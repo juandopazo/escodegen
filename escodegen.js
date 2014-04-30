@@ -1654,11 +1654,53 @@
             break;
 
         case Syntax.ExportDeclaration:
-            result = 'export ';
+            result = [
+                'export',
+                space
+            ];
             if (stmt.declaration) {
+                if (stmt.default) {
+                    result.push(
+                        'default',
+                        space
+                    );
+                }
                 // FunctionDeclaration or VariableDeclaration
-                result = [result, generateStatement(stmt.declaration, { semicolonOptional: semicolon === '' })];
-                break;
+                result.push(generateStatement(stmt.declaration, { semicolonOptional: semicolon === '' }));
+            } else if (stmt.specifiers) {
+                result.push('{');
+                // export { ... }
+                if (stmt.specifiers.length === 1) {
+                    specifier = stmt.specifiers[0];
+                    result.push(space + specifier.id.name);
+                    if (specifier.name) {
+                        result.push(noEmptySpace() + 'as' + noEmptySpace() + specifier.name.name);
+                    }
+                // export {
+                //   ...,
+                //   ...
+                // }
+                } else {
+                    withIndent(function (indent) {
+                        var i, iz;
+                        result.push(newline);
+                        for (i = 0, iz = stmt.specifiers.length; i < iz; ++i) {
+                            specifier = stmt.specifiers[i];
+                            result.push(indent + specifier.id.name);
+                            if (specifier.name) {
+                                result.push(noEmptySpace() + 'as' + noEmptySpace() + specifier.name.name);
+                            }
+
+                            if (i + 1 < iz) {
+                                result.push(',' + newline);
+                            }
+                        }
+                    });
+                }
+                if (!endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString())) {
+                    result.push(newline);
+                }
+                result.push(base + '}');
             }
             break;
 
