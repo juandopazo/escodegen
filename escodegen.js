@@ -1676,6 +1676,7 @@
                     if (specifier.name) {
                         result.push(noEmptySpace() + 'as' + noEmptySpace() + specifier.name.name);
                     }
+                    result.push(space);
                 // export {
                 //   ...,
                 //   ...
@@ -1696,11 +1697,11 @@
                             }
                         }
                     });
+                    if (!endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString())) {
+                        result.push(newline);
+                    }
                 }
-                if (!endsWithLineTerminator(toSourceNodeWhenNeeded(result).toString())) {
-                    result.push(newline);
-                }
-                result.push(base + '}');
+                result.push('}');
             }
             break;
 
